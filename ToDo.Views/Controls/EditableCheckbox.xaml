@@ -1,0 +1,47 @@
+﻿<UserControl
+    x:Class="ToDo.Views.Controls.EditableCheckbox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="300"
+    d:DesignWidth="400"
+    IsTabStop="False"
+    mc:Ignorable="d">
+    <Grid Margin="15,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+        <CheckBox x:Name="ToDoCheckbox" IsTabStop="False" />
+        <TextBlock
+            x:Name="CheckboxLabel"
+            Grid.Column="1"
+            Height="20"
+            Margin="16,0"
+            Tapped="CheckboxLabel_Tapped"
+            Text="Placeholder" />
+        <TextBox
+            x:Name="CheckboxTextbox"
+            Grid.Column="1"
+            Height="30"
+            Margin="4,0"
+            BorderBrush="Transparent"
+            LostFocus="CheckboxTextbox_LostFocus"
+            PlaceholderText="Placeholder"
+            PreviewKeyDown="CheckboxTextbox_PreviewKeyDown"
+            Style="{StaticResource ComboBoxTextBoxStyle}"
+            Text="Updated Text"
+            Visibility="Collapsed" />
+        <Button
+            x:Name="CheckboxTextChangeButton"
+            Grid.Column="2"
+            HorizontalAlignment="Right"
+            IsTabStop="False"
+            Style="{StaticResource TextBlockButtonStyle}"
+            Tapped="Button_Click">
+            <SymbolIcon x:Name="CheckboxTextChangeIcon" Symbol="Edit" />
+        </Button>
+    </Grid>
+</UserControl>
