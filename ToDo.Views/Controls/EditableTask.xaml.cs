@@ -1,16 +1,15 @@
-﻿using System.Diagnostics;
-using Windows.System;
+﻿using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 
 namespace ToDo.Views.Controls
 {
-    public sealed partial class EditableCheckbox : UserControl
+    public sealed partial class EditableTask : UserControl
     {
         private bool _isEditing;
 
-        public EditableCheckbox()
+        public EditableTask()
         {
             InitializeComponent();
         }
