@@ -1,81 +1,157 @@
-﻿using Windows.System;
+﻿using System;
+using System.Diagnostics;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 
 namespace ToDo.Views.Controls
 {
+    public enum TaskState
+    {
+        Adding,
+        Added,
+        Editing
+    }
+
     public sealed partial class EditableTask : UserControl
     {
-        private bool _isEditing;
+        public static readonly DependencyProperty CurrentTaskStateProperty =
+            DependencyProperty.Register("CurrentTaskStateProperty", typeof(TaskState), typeof(EditableTask), new PropertyMetadata(TaskState.Added, OnTaskStateChanged));
+
+        public static readonly DependencyProperty HasCompletedProperty =
+            DependencyProperty.Register("HasCompleted", typeof(bool), typeof(EditableTask), new PropertyMetadata(false));
+
+        public static readonly DependencyProperty TaskDescriptionProperty =
+            DependencyProperty.Register("TaskDescription", typeof(string), typeof(EditableTask), new PropertyMetadata(string.Empty));
 
         public EditableTask()
         {
             InitializeComponent();
         }
 
-        private bool IsEditing
+        public TaskState CurrentTaskState
         {
-            get => _isEditing;
-            set
-            {
-                if (_isEditing != value)
+            get { return (TaskState)GetValue(CurrentTaskStateProperty); }
+            set { SetValue(CurrentTaskStateProperty, value); }
+        }
+
+        public bool HasCompleted
+        {
+            get { return (bool)GetValue(HasCompletedProperty); }
+            set { 
+                if(CurrentTaskState == TaskState.Adding && value)
                 {
-                    _isEditing = value;
-
-                    if (_isEditing)
-                    {
-                        CheckboxLabel.Visibility = Visibility.Collapsed;
-                        CheckboxTextbox.Visibility = Visibility.Visible;
-                        CheckboxTextbox.Focus(FocusState.Programmatic);
-                        CheckboxTextChangeIcon.Symbol = Symbol.Accept;
-                    }
-                    else
-                    {
-                        CheckboxLabel.Visibility = Visibility.Visible;
-                        CheckboxTextbox.Visibility = Visibility.Collapsed;
-                        CheckboxTextChangeIcon.Symbol = Symbol.Edit;
-                    }
+                    Debug.Fail("Task which is not yet added cannot be complete");
+                    return;
                 }
+
+                SetValue(HasCompletedProperty, value); 
             }
         }
 
-        private void CheckboxTextbox_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+        public string TaskDescription
         {
-            if(e.Key == VirtualKey.Enter)
-            {
-                CheckboxLabel.Text = CheckboxTextbox.Text;
-                IsEditing = false;
-            } else if(e.Key == VirtualKey.Escape)
-            {
-                IsEditing = false;
-                CheckboxTextbox.Text = CheckboxLabel.Text;
+            get { return (string)GetValue(TaskDescriptionProperty); }
+            set { 
+                if(CurrentTaskState == TaskState.Adding)
+                {
+                    Debug.Fail("Task which is not yet added cannot have task description");
+                    return;
+                }
+
+                SetValue(TaskDescriptionProperty, value); 
             }
-
         }
 
-        private void CheckboxLabel_Tapped(object sender, TappedRoutedEventArgs e)
+        private void UpdateState()
         {
-            ToDoCheckbox.IsChecked = !ToDoCheckbox.IsChecked;
-        }
-
-        private void CheckboxTextbox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            IsEditing = false;
-            CheckboxTextbox.Text = CheckboxLabel.Text;
-        }
-
-        private void Button_Click(object sender, TappedRoutedEventArgs e)
-        {
-            if (IsEditing)
+            switch (CurrentTaskState)
             {
-                IsEditing = false;
-                CheckboxLabel.Text = CheckboxTextbox.Text;
+                case TaskState.Adding:
+                    VisualStateManager.GoToState(this, "AddingTask", false);
+                    break;
+                case TaskState.Added:
+                    VisualStateManager.GoToState(this, "AddedTask", false);
+                    break;
+                case TaskState.Editing:
+                    VisualStateManager.GoToState(this, "EditingTask", false);
+                    TaskTextbox.Focus(FocusState.Programmatic);
+                    break;
+                default:
+                    Debug.Fail("Unhandled task state");
+                    break;
+            }
+        }
+
+        private void AcceptChanges()
+        {
+            if (!String.IsNullOrEmpty(TaskTextbox.Text))
+            {
+                TaskLabel.Text = TaskTextbox.Text;
+                CurrentTaskState = TaskState.Added;
+            }
+        }
+
+        private void DiscardChanges()
+        {
+            if (CurrentTaskState == TaskState.Adding)
+            {
+                TaskTextbox.Text = String.Empty;
             }
             else
             {
-                CheckboxTextbox.Text = CheckboxLabel.Text;
-                IsEditing = true;
+                CurrentTaskState = TaskState.Added;
+                TaskTextbox.Text = TaskLabel.Text;
+            }
+        }
+
+        private void OnEditableTaskLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateState();
+        }
+
+        private static void OnTaskStateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            EditableTask editableTask = (EditableTask)d;
+
+            editableTask.UpdateState();
+        }
+
+        private void OnTaskTextboxPreviewKeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Enter)
+            {
+                AcceptChanges();
+            }
+            else if (e.Key == VirtualKey.Escape)
+            {
+                DiscardChanges();
+            }
+
+        }
+
+        private void OnTaskTextboxLostFocus(object sender, RoutedEventArgs e)
+        {
+            DiscardChanges();
+        }
+
+        private void OnTaskLabelTapped(object sender, TappedRoutedEventArgs e)
+        {
+            TaskCheckbox.IsChecked = !TaskCheckbox.IsChecked;
+        }
+
+        private void OnTaskStateUpdateButtonClicked(object sender, TappedRoutedEventArgs e)
+        {
+            if (CurrentTaskState == TaskState.Added)
+            {
+                TaskTextbox.Text = TaskLabel.Text;
+                TaskTextbox.SelectionStart = TaskTextbox.Text.Length;
+                CurrentTaskState = TaskState.Editing;
+            }
+            else
+            {
+                AcceptChanges();
             }
         }
     }

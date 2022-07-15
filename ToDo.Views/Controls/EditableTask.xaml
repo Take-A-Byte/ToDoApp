@@ -4,9 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="300"
-    d:DesignWidth="400"
-    IsTabStop="False"
+    d:DesignHeight="32"
+    d:DesignWidth="200"
+    Loaded="OnEditableTaskLoaded"
+    TabIndex="0"
     mc:Ignorable="d">
     <Grid Margin="15,0">
         <Grid.ColumnDefinitions>
@@ -14,34 +15,67 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <CheckBox x:Name="ToDoCheckbox" IsTabStop="False" />
+        <CheckBox
+            x:Name="TaskCheckbox"
+            IsChecked="{x:Bind HasCompleted, Mode=TwoWay}"
+            IsEnabled="False"
+            IsTabStop="False" />
         <TextBlock
-            x:Name="CheckboxLabel"
+            x:Name="TaskLabel"
             Grid.Column="1"
             Height="20"
             Margin="16,0"
-            Tapped="CheckboxLabel_Tapped"
-            Text="Placeholder" />
+            Tapped="OnTaskLabelTapped"
+            Text="{x:Bind TaskDescription, Mode=TwoWay}" />
         <TextBox
-            x:Name="CheckboxTextbox"
+            x:Name="TaskTextbox"
             Grid.Column="1"
             Height="30"
             Margin="4,0"
-            BorderBrush="Transparent"
-            LostFocus="CheckboxTextbox_LostFocus"
-            PlaceholderText="Placeholder"
-            PreviewKeyDown="CheckboxTextbox_PreviewKeyDown"
+            IsTabStop="True"
+            LostFocus="OnTaskTextboxLostFocus"
+            PlaceholderText="Add task description"
+            PreviewKeyDown="OnTaskTextboxPreviewKeyDown"
             Style="{StaticResource ComboBoxTextBoxStyle}"
-            Text="Updated Text"
-            Visibility="Collapsed" />
+            TabIndex="0"
+            Text="{x:Bind TaskDescription}" />
         <Button
-            x:Name="CheckboxTextChangeButton"
             Grid.Column="2"
             HorizontalAlignment="Right"
             IsTabStop="False"
             Style="{StaticResource TextBlockButtonStyle}"
-            Tapped="Button_Click">
-            <SymbolIcon x:Name="CheckboxTextChangeIcon" Symbol="Edit" />
+            Tapped="OnTaskStateUpdateButtonClicked">
+            <SymbolIcon x:Name="TaskStateUpdateIcon" Symbol="Edit" />
         </Button>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="TaskStates">
+                <VisualState x:Name="AddingTask">
+                    <VisualState.Setters>
+                        <Setter Target="TaskTextbox.PlaceholderText" Value="Add new task" />
+                        <Setter Target="TaskLabel.Visibility" Value="Collapsed" />
+                        <Setter Target="TaskStateUpdateIcon.Symbol" Value="Add" />
+                        <Setter Target="TaskCheckbox.IsEnabled" Value="false" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="AddedTask">
+                    <VisualState.Setters>
+                        <Setter Target="TaskTextbox.IsTabStop" Value="false" />
+                        <Setter Target="TaskTextbox.Visibility" Value="Collapsed" />
+                        <Setter Target="TaskLabel.Visibility" Value="Visible" />
+                        <Setter Target="TaskStateUpdateIcon.Symbol" Value="Edit" />
+                        <Setter Target="TaskCheckbox.IsEnabled" Value="true" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="EditingTask">
+                    <VisualState.Setters>
+                        <Setter Target="TaskTextbox.IsTabStop" Value="true" />
+                        <Setter Target="TaskLabel.Visibility" Value="Collapsed" />
+                        <Setter Target="TaskTextbox.Visibility" Value="Visible" />
+                        <Setter Target="TaskStateUpdateIcon.Symbol" Value="Accept" />
+                        <Setter Target="TaskCheckbox.IsEnabled" Value="false" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </UserControl>
