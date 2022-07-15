@@ -25,9 +25,12 @@ namespace ToDo.Views.Controls
         public static readonly DependencyProperty TaskDescriptionProperty =
             DependencyProperty.Register("TaskDescription", typeof(string), typeof(EditableTask), new PropertyMetadata(string.Empty));
 
+        private DispatcherTimer _timer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(2500) };
+
         public EditableTask()
         {
             InitializeComponent();
+            _timer.Tick += OnInputErrorTeachingTipTimerTicked;
         }
 
         public TaskState CurrentTaskState
@@ -39,29 +42,37 @@ namespace ToDo.Views.Controls
         public bool HasCompleted
         {
             get { return (bool)GetValue(HasCompletedProperty); }
-            set { 
-                if(CurrentTaskState == TaskState.Adding && value)
+            set
+            {
+                if (CurrentTaskState == TaskState.Adding && value)
                 {
                     Debug.Fail("Task which is not yet added cannot be complete");
                     return;
                 }
 
-                SetValue(HasCompletedProperty, value); 
+                SetValue(HasCompletedProperty, value);
             }
         }
 
         public string TaskDescription
         {
             get { return (string)GetValue(TaskDescriptionProperty); }
-            set { 
-                if(CurrentTaskState == TaskState.Adding)
+            set
+            {
+                if (CurrentTaskState == TaskState.Adding && string.IsNullOrEmpty(value))
                 {
                     Debug.Fail("Task which is not yet added cannot have task description");
                     return;
                 }
 
-                SetValue(TaskDescriptionProperty, value); 
+                SetValue(TaskDescriptionProperty, value);
             }
+        }
+
+        private void SetProgramticFocusOnTextbox()
+        {
+            TaskTextbox.SelectionStart = TaskTextbox.Text.Length;
+            TaskTextbox.Focus(FocusState.Programmatic);
         }
 
         private void UpdateState()
@@ -76,7 +87,7 @@ namespace ToDo.Views.Controls
                     break;
                 case TaskState.Editing:
                     VisualStateManager.GoToState(this, "EditingTask", false);
-                    TaskTextbox.Focus(FocusState.Programmatic);
+                    SetProgramticFocusOnTextbox();
                     break;
                 default:
                     Debug.Fail("Unhandled task state");
@@ -91,6 +102,18 @@ namespace ToDo.Views.Controls
                 TaskLabel.Text = TaskTextbox.Text;
                 CurrentTaskState = TaskState.Added;
             }
+            else
+            {
+                InputErrorTeachingTip.IsOpen = true;
+                _timer.Start();
+                SetProgramticFocusOnTextbox();
+            }
+        }
+
+        private void OnInputErrorTeachingTipTimerTicked(object sender, object e)
+        {
+            _timer.Stop();
+            InputErrorTeachingTip.IsOpen = false;
         }
 
         private void DiscardChanges()
@@ -108,13 +131,13 @@ namespace ToDo.Views.Controls
 
         private void OnEditableTaskLoaded(object sender, RoutedEventArgs e)
         {
+            TaskLabel.Text = TaskDescription;
             UpdateState();
         }
 
         private static void OnTaskStateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             EditableTask editableTask = (EditableTask)d;
-
             editableTask.UpdateState();
         }
 
@@ -128,7 +151,6 @@ namespace ToDo.Views.Controls
             {
                 DiscardChanges();
             }
-
         }
 
         private void OnTaskTextboxLostFocus(object sender, RoutedEventArgs e)
@@ -146,7 +168,6 @@ namespace ToDo.Views.Controls
             if (CurrentTaskState == TaskState.Added)
             {
                 TaskTextbox.Text = TaskLabel.Text;
-                TaskTextbox.SelectionStart = TaskTextbox.Text.Length;
                 CurrentTaskState = TaskState.Editing;
             }
             else
