@@ -9,12 +9,7 @@ namespace ToDo.Storage
             throw new NotImplementedException();
         }
 
-        public Task<bool> GetAllTasks()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> GetTask(long taskId)
+        public Task<IEnumerable<IToDoTask>> GetAllTasks()
         {
             throw new NotImplementedException();
         }
