@@ -4,12 +4,12 @@ namespace ToDo.Core
 {
     public class TaskController : ITaskController
     {
-        public Task AddTask(string description)
+        public Task<bool> AddTask(string description)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IToDoTask> GetAllTasks()
+        public Task<IList<IToDoTask>> GetAllTasks()
         {
             throw new NotImplementedException();
         }

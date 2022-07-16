@@ -2,7 +2,7 @@
 {
     public interface ITaskController
     {
-        Task<IToDoTask> GetAllTasks();
-        Task AddTask(string description);
+        Task<IList<IToDoTask>> GetAllTasks();
+        Task<bool> AddTask(string description);
     }
 }
