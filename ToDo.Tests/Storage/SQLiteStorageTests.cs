@@ -3,7 +3,6 @@ using Moq;
 using System.IO;
 using ToDo.API;
 using Microsoft.Data.Sqlite;
-using ToDo.Tests.Stubs;
 using ToDo.Storage;
 
 namespace ToDo.Tests.Storage
@@ -15,7 +14,7 @@ namespace ToDo.Tests.Storage
         [SetUp]
         public void SetUp()
         {
-            _storage = new SQLiteStorage(_kDatabasePath, new TaskFactoryStub());
+            _storage = new SQLiteStorage(_kDatabasePath);
         }
 
         [TearDown]
@@ -35,7 +34,7 @@ namespace ToDo.Tests.Storage
             Assert.IsTrue(File.Exists(_kDatabasePath));
         }
 
-        protected override void AddTaskToTestStorage(long id, IToDoTask task)
+        protected override void AddTaskToTestStorage(IToDoTask task)
         {
             using (var connection = new SqliteConnection($"Data Source={_kDatabasePath}"))
             {
@@ -47,7 +46,7 @@ namespace ToDo.Tests.Storage
                         INSERT INTO Tasks
                         VALUES ($id, $description, $hasCompleted)
                     ";
-                insertTaskCommand.Parameters.AddWithValue("$id", id);
+                insertTaskCommand.Parameters.AddWithValue("$id", task.Id);
                 insertTaskCommand.Parameters.AddWithValue("$description", $"{task.Description}");
                 insertTaskCommand.Parameters.AddWithValue("$hasCompleted", task.HasCompleted);
                 insertTaskCommand.ExecuteNonQuery();

@@ -1,29 +1,68 @@
-﻿using ToDo.API;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using ToDo.API;
 
 namespace ToDo.Core
 {
-    public class TaskController : ITaskController, ITaskFactory
+    public class TaskController : ITaskController
     {
         private readonly ITaskStorage _taskStorage;
+        private long? _newIdForUse = null;
 
         public TaskController(ITaskStorage taskStorage)
         {
             _taskStorage = taskStorage;
         }
 
-        public Task<bool> AddTask(string description)
+        public async Task<bool> AddTask(string description)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                Debug.Fail("description should not be empty");
+                return false;
+            }
+
+            if(_newIdForUse == null)
+            {
+                _newIdForUse = await _taskStorage.GetTotalNumberOfTasks();
+            }
+            return await _taskStorage.AddNewTask((long)(_newIdForUse++), description);
         }
 
-        public IToDoTask CreateToDoTask(long id, string description, bool hasCompleted)
+        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks()
         {
-            throw new NotImplementedException();
+            var tasks = await _taskStorage.GetAllTasks(CreateToDoTask);
+            foreach (var task in tasks)
+            {
+                ((ToDoTask)task).PropertyChanged += OnTaskAttributesChanged;
+            }
+
+            return tasks;
         }
 
-        public Task<IReadOnlyList<IToDoTask>> GetAllTasks()
+        private void OnTaskAttributesChanged(object sender, PropertyChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            ToDoTask toDoTask = (ToDoTask)sender;
+            switch (e.PropertyName)
+            {
+                case nameof(ToDoTask.Description):
+                    _taskStorage.UpdateTaskDescription(toDoTask.Id, toDoTask.Description);
+                    return;
+                case nameof(ToDoTask.HasCompleted):
+                    _taskStorage.UpdateTaskCompleteness(toDoTask.Id, toDoTask.HasCompleted);
+                    return;
+                default:
+                    Debug.Fail("We should update storage for this property as well");
+                    return;
+            }
         }
+
+        private IToDoTask CreateToDoTask(long id, string description, bool hasCompleted)
+        {
+            var retrivedTask = new ToDoTask(id, description, hasCompleted);
+            retrivedTask.PropertyChanged += OnTaskAttributesChanged;
+            return retrivedTask;
+        }
+
     }
 }

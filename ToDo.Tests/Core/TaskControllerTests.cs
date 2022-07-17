@@ -1,6 +1,8 @@
 ﻿using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ToDo.API;
 using ToDo.Core;
@@ -9,30 +11,57 @@ namespace ToDo.Tests.Core
 {
     public class TaskControllerTests
     {
-        private IReadOnlyList<IToDoTask> _tasks;
+        private List<IToDoTask> _tasks;
         private Mock<ITaskStorage> _mockTaskStorage;
-        private bool _addedTaskInStorage;
 
         private TaskController _taskController;
 
         [SetUp]
         public void SetUp()
         {
+            _tasks = new List<IToDoTask>();
             _mockTaskStorage = new Mock<ITaskStorage>();
-            _mockTaskStorage.Setup(storage => storage.AddNewTask(It.IsAny<long>(), It.IsAny<string>())).ReturnsAsync(true);
-            var tasks = new List<IToDoTask>();
-            tasks.Add(_taskController.CreateToDoTask(1, "This is test task 1", false));
-            tasks.Add(_taskController.CreateToDoTask(2, "This is test task 2", true));
-            _tasks = tasks.AsReadOnly();
-            _mockTaskStorage.Setup(storage => storage.GetAllTasks()).ReturnsAsync(_tasks);
-
             _taskController = new TaskController(_mockTaskStorage.Object);
+
+            _mockTaskStorage.Setup(storage => storage.AddNewTask(It.IsAny<long>(), It.IsAny<string>()))
+                .ReturnsAsync(
+                (long id, string description) =>
+                {
+                    _tasks.Add(CreateMockTask(id, description, false));
+                    return true;
+                });
+
+            _mockTaskStorage.Setup(storage => storage.GetTotalNumberOfTasks()).ReturnsAsync(() => _tasks.Count);
+            _mockTaskStorage.Setup(storage => storage.GetAllTasks(It.IsAny<Func<long, string, bool, IToDoTask>>()))
+                .ReturnsAsync((Func<long, string, bool, IToDoTask> actualTaskCreator) =>
+                {
+                    List<IToDoTask> actualTasks = new List<IToDoTask>();
+                    foreach(var task in _tasks)
+                    {
+                        actualTasks.Add(actualTaskCreator(task.Id, task.Description, task.HasCompleted));
+                    }
+                    return actualTasks;
+                }
+                );
+            _mockTaskStorage.Setup(storage => storage.UpdateTaskDescription(It.IsAny<long>(), It.IsAny<string>()))
+                .ReturnsAsync((long id, string description) =>
+                {
+                    _tasks.Find(x => x.Id == id).Description = description;
+                    return true;
+                });
+            _mockTaskStorage.Setup(storage => storage.UpdateTaskCompleteness(It.IsAny<long>(), It.IsAny<bool>()))
+                .ReturnsAsync((long id, bool hasCompleted) =>
+                {
+                    _tasks.Find(x => x.Id == id).HasCompleted = hasCompleted;
+                    return true;
+                });
         }
 
         [TearDown]
         public void CleanUp()
         {
-            _addedTaskInStorage = false;
+            _tasks.Clear();
+            _tasks = null;
             _mockTaskStorage = null;
             _taskController = null;
         }
@@ -43,12 +72,15 @@ namespace ToDo.Tests.Core
         [TestCase("   ")]
         public async Task OnAddTask_WithEmptyDescription_AndReturnsFalse_AndDoesNotAddStorage(string description = null)
         {
+            // given
+            Trace.Listeners.Clear();
+
             // when
             bool result = await _taskController.AddTask(description);
 
             // then
             Assert.IsFalse(result);
-            Assert.IsFalse(_addedTaskInStorage);
+            Assert.AreEqual(0, _tasks.Count);
         }
 
         [Test]
@@ -59,12 +91,16 @@ namespace ToDo.Tests.Core
 
             // then
             Assert.IsTrue(result);
-            Assert.IsTrue(_addedTaskInStorage);
+            Assert.AreEqual(1, _tasks.Count);
         }
 
         [Test]
         public async Task OnGetAllTasks_GetAllTasksFromStorage()
         {
+            // given
+            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
+            _tasks.Add(CreateMockTask(2, "This is test task 2", true));
+
             // when
             var retrivedTasks = await _taskController.GetAllTasks();
 
@@ -80,23 +116,25 @@ namespace ToDo.Tests.Core
         [TestCase()]
         [TestCase("")]
         [TestCase("   ")]
-        public async Task OnDescriptionSetCalled_WithEmptyString_DoesNotUpdateDescription(string description = null)
+        public async Task OnDescriptionSetOnRetrivedTask_WithEmptyString_DoesNotUpdateDescription(string description = null)
         {
             // given
+            string oldDescriptionOfTask1 = "This is test task 1";
+            _tasks.Add(CreateMockTask(1, oldDescriptionOfTask1, false));
             var retrivedTasks = await _taskController.GetAllTasks();
-            string oldDescriptionOfTask1 = retrivedTasks[0].Description; 
 
             // when
             retrivedTasks[0].Description = description;
 
             // then
-            Assert.AreEqual(oldDescriptionOfTask1, retrivedTasks[0]);
+            Assert.AreEqual(oldDescriptionOfTask1, retrivedTasks[0].Description);
         }
 
         [Test]
-        public async Task OnDescriptionSetCalled_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
+        public async Task OnDescriptionSetWithRetrivedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
         {
             // given
+            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -104,13 +142,14 @@ namespace ToDo.Tests.Core
             retrivedTasks[0].Description = newDescription;
 
             // then
-            Assert.AreEqual(newDescription, retrivedTasks[0]);
+            Assert.AreEqual(newDescription, retrivedTasks[0].Description);
         }
 
         [Test]
-        public async Task OnHasCompletedSetCalled_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
+        public async Task OnHasCompletedSetOnRetrivedTask_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
         {
             // given
+            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -118,7 +157,21 @@ namespace ToDo.Tests.Core
             retrivedTasks[0].HasCompleted = newHasCompleted;
 
             // then
-            Assert.AreEqual(newHasCompleted, retrivedTasks[0]);
+            Assert.AreEqual(newHasCompleted, retrivedTasks[0].HasCompleted);
         }
+
+        private static IToDoTask CreateMockTask(long id, string description, bool hasCompleted)
+        {
+            var task = new Mock<IToDoTask>();
+            task.SetupGet(t => t.Id).Returns(id);
+            task.SetupGet(task => task.Description).Returns(() => description);
+            task.SetupSet(task => task.Description = It.IsAny<string>())
+                .Callback<string>((newDescription) => description = newDescription);
+            task.SetupGet(task => task.HasCompleted).Returns(() => hasCompleted);
+            task.SetupSet(task => task.HasCompleted = It.IsAny<bool>())
+                .Callback<bool>((newHasCompleted) => hasCompleted = newHasCompleted);
+            return task.Object;
+        }
+
     }
 }

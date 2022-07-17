@@ -5,13 +5,11 @@ namespace ToDo.Storage
 {
     public class SQLiteStorage : ITaskStorage, IDisposable
     {
-        private readonly ITaskFactory _taskFactory;
         private SqliteConnection _sqLiteConnection;
 
-        public SQLiteStorage(string databasePath, ITaskFactory taskFactory)
+        public SQLiteStorage(string databasePath)
         {
             _sqLiteConnection = new SqliteConnection($"Data Source={databasePath}");
-            _taskFactory = taskFactory;
 
             bool didFileExist = File.Exists(databasePath);
             if (!didFileExist)
@@ -62,13 +60,15 @@ namespace ToDo.Storage
             try
             {
                 taskAdded = await insertTaskCommand.ExecuteNonQueryAsync() == 1;
-            } catch {
             }
-            
+            catch
+            {
+            }
+
             return taskAdded;
         }
 
-        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks()
+        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks(Func<long, string, bool, IToDoTask> taskCreator)
         {
             var getAllCommand = _sqLiteConnection.CreateCommand();
             getAllCommand.CommandText =
@@ -80,7 +80,7 @@ namespace ToDo.Storage
                 List<IToDoTask> tasks = new List<IToDoTask>();
                 while (reader.Read())
                 {
-                    tasks.Add(_taskFactory.CreateToDoTask(reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2)));
+                    tasks.Add(taskCreator(reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2)));
                 }
 
                 return tasks.AsReadOnly();
@@ -133,6 +133,20 @@ namespace ToDo.Storage
             }
 
             return taskDescriptionupdated;
+        }
+
+        public async Task<long> GetTotalNumberOfTasks()
+        {
+            var selectAllCommand = _sqLiteConnection.CreateCommand();
+            selectAllCommand.CommandText =
+                @"
+                        SELECT COUNT(*) FROM Tasks
+                    ";
+            using (var reader = await selectAllCommand.ExecuteReaderAsync())
+            {
+                reader.Read();
+                return reader.GetInt32(0);
+            }
         }
     }
 }
