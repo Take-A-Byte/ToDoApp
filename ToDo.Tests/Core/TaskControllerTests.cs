@@ -23,22 +23,23 @@ namespace ToDo.Tests.Core
             _mockTaskStorage = new Mock<ITaskStorage>();
             _taskController = new TaskController(_mockTaskStorage.Object);
 
-            _mockTaskStorage.Setup(storage => storage.AddNewTask(It.IsAny<long>(), It.IsAny<string>()))
+            _mockTaskStorage.Setup(storage => storage.AddNewTask(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<Func<long, string, bool, IToDoTask>>()))
                 .ReturnsAsync(
-                (long id, string description) =>
+                (long id, string description, Func<long, string, bool, IToDoTask> realTaskCreator) =>
                 {
-                    _tasks.Add(CreateMockTask(id, description, false));
-                    return true;
+                    IToDoTask newTask = realTaskCreator(id, description, false);
+                    _tasks.Add(newTask);
+                    return newTask;
                 });
 
             _mockTaskStorage.Setup(storage => storage.GetTotalNumberOfTasks()).ReturnsAsync(() => _tasks.Count);
             _mockTaskStorage.Setup(storage => storage.GetAllTasks(It.IsAny<Func<long, string, bool, IToDoTask>>()))
-                .ReturnsAsync((Func<long, string, bool, IToDoTask> actualTaskCreator) =>
+                .ReturnsAsync((Func<long, string, bool, IToDoTask> realTaskCreator) =>
                 {
                     Dictionary<long, IToDoTask> actualTasks = new Dictionary<long, IToDoTask>();
                     foreach(var task in _tasks)
                     {
-                        actualTasks.Add(task.Id, actualTaskCreator(task.Id, task.Description, task.HasCompleted));
+                        actualTasks.Add(task.Id, realTaskCreator(task.Id, task.Description, task.HasCompleted));
                     }
                     return actualTasks;
                 }
@@ -76,10 +77,10 @@ namespace ToDo.Tests.Core
             Trace.Listeners.Clear();
 
             // when
-            bool result = await _taskController.AddTask(description);
+            var newTask = await _taskController.AddTask(description);
 
             // then
-            Assert.IsFalse(result);
+            Assert.IsNull(newTask);
             Assert.AreEqual(0, _tasks.Count);
         }
 
@@ -87,10 +88,10 @@ namespace ToDo.Tests.Core
         public async Task OnAddTask_WithNonEmptyDescription_ReturnsTrue_AndAddsToStorage()
         {
             // when
-            bool result = await _taskController.AddTask("This is description of task");
+            var newtask = await _taskController.AddTask("This is description of task");
 
             // then
-            Assert.IsTrue(result);
+            Assert.IsNotNull(newtask);
             Assert.AreEqual(1, _tasks.Count);
         }
 
@@ -110,6 +111,51 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(_tasks[1].Description, retrivedTasks[2].Description);
             Assert.AreEqual(_tasks[0].HasCompleted, retrivedTasks[1].HasCompleted);
             Assert.AreEqual(_tasks[1].HasCompleted, retrivedTasks[2].HasCompleted);
+        }
+
+        [Test]
+        [TestCase()]
+        [TestCase("")]
+        [TestCase("   ")]
+        public async Task OnDescriptionSetOnAddedTask_WithEmptyString_DoesNotUpdateDescription(string description = null)
+        {
+            // given
+            string oldDescriptionOfTask1 = "This is test task 1";
+            var addedTask = await _taskController.AddTask(oldDescriptionOfTask1);
+
+            // when
+            addedTask.Description = description;
+
+            // then
+            Assert.AreEqual(oldDescriptionOfTask1, addedTask.Description);
+        }
+
+        [Test]
+        public async Task OnDescriptionSetWithAddedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
+        {
+            // given
+            var addedTasks = await _taskController.AddTask("This is test task 1");
+
+            // when
+            const string newDescription = "new description";
+            addedTasks.Description = newDescription;
+
+            // then
+            Assert.AreEqual(newDescription, addedTasks.Description);
+        }
+
+        [Test]
+        public async Task OnHasCompletedSetOnAddedTask_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
+        {
+            // given
+            var addedTasks = await _taskController.AddTask("This is test task 1");
+
+            // when
+            bool newHasCompleted = !addedTasks.HasCompleted;
+            addedTasks.HasCompleted = newHasCompleted;
+
+            // then
+            Assert.AreEqual(newHasCompleted, addedTasks.HasCompleted);
         }
 
         [Test]

@@ -14,19 +14,19 @@ namespace ToDo.Core
             _taskStorage = taskStorage;
         }
 
-        public async Task<bool> AddTask(string description)
+        public async Task<IToDoTask> AddTask(string description)
         {
             if (string.IsNullOrWhiteSpace(description))
             {
                 Debug.Fail("description should not be empty");
-                return false;
+                return null;
             }
 
             if(_newIdForUse == null)
             {
                 _newIdForUse = await _taskStorage.GetTotalNumberOfTasks();
             }
-            return await _taskStorage.AddNewTask((long)(_newIdForUse++), description);
+            return await _taskStorage.AddNewTask((long)_newIdForUse++, description, CreateToDoTask);
         }
 
         public async Task<IReadOnlyDictionary<long, IToDoTask>> GetAllTasks()

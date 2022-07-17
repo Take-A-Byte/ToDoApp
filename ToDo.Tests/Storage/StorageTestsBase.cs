@@ -24,14 +24,16 @@ namespace ToDo.Tests.Storage
             const string newTaskDescription = "my new task description";
 
             // when
-            bool resultWhenStringIsEmpty = await _storage.AddNewTask(newTaskId, newTaskDescription);
+            var addedTask = await _storage.AddNewTask(newTaskId, newTaskDescription, CreateNewMockTask);
 
             // then
-            Assert.IsTrue(resultWhenStringIsEmpty);
+            Assert.IsNotNull(addedTask);
             Assert.AreEqual(1, NumberOfTasksInStorage());
-            var addedTask = GetTaskWithId(newTaskId);
+            var taskRetrivedFromStorage = GetTaskWithId(newTaskId);
             Assert.AreEqual(newTaskDescription, addedTask.Description);
+            Assert.AreEqual(newTaskDescription, taskRetrivedFromStorage.Description);
             Assert.AreEqual(false, addedTask.HasCompleted);
+            Assert.AreEqual(false, taskRetrivedFromStorage.HasCompleted);
         }
 
         [Test]

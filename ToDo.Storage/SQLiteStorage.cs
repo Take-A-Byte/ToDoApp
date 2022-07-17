@@ -44,8 +44,9 @@ namespace ToDo.Storage
             SqliteConnection.ClearAllPools();
         }
 
-        public async Task<bool> AddNewTask(long taskId, string description)
+        public async Task<IToDoTask> AddNewTask(long taskId, string description, Func<long, string, bool, IToDoTask> taskCreator)
         {
+            bool hasCompletedForNewTask = false;
             var insertTaskCommand = _sqLiteConnection.CreateCommand();
             insertTaskCommand.CommandText =
                 @"
@@ -54,18 +55,18 @@ namespace ToDo.Storage
                     ";
             insertTaskCommand.Parameters.AddWithValue("$id", taskId);
             insertTaskCommand.Parameters.AddWithValue("$description", $"{description}");
-            insertTaskCommand.Parameters.AddWithValue("$hasCompleted", false);
+            insertTaskCommand.Parameters.AddWithValue("$hasCompleted", hasCompletedForNewTask);
 
-            bool taskAdded = false;
             try
             {
-                taskAdded = await insertTaskCommand.ExecuteNonQueryAsync() == 1;
+                await insertTaskCommand.ExecuteNonQueryAsync();
             }
-            catch
+            catch 
             {
+                return null;
             }
 
-            return taskAdded;
+            return taskCreator(taskId, description, hasCompletedForNewTask);
         }
 
         public async Task<IReadOnlyDictionary<long, IToDoTask>> GetAllTasks(Func<long, string, bool, IToDoTask> taskCreator)
