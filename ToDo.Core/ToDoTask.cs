@@ -2,7 +2,7 @@
 
 namespace ToDo.Core
 {
-    public class ToDoTask : IToDoTask
+    internal class ToDoTask : IToDoTask
     {
         public long Id => throw new NotImplementedException();
 

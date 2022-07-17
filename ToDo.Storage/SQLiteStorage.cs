@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using System.Diagnostics;
 using ToDo.API;
 
 namespace ToDo.Storage
@@ -65,11 +64,11 @@ namespace ToDo.Storage
                 taskAdded = await insertTaskCommand.ExecuteNonQueryAsync() == 1;
             } catch {
             }
-
+            
             return taskAdded;
         }
 
-        public async Task<IList<IToDoTask>> GetAllTasks()
+        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks()
         {
             var getAllCommand = _sqLiteConnection.CreateCommand();
             getAllCommand.CommandText =
@@ -84,7 +83,7 @@ namespace ToDo.Storage
                     tasks.Add(_taskFactory.CreateToDoTask(reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2)));
                 }
 
-                return tasks;
+                return tasks.AsReadOnly();
             }
         }
 

@@ -118,7 +118,7 @@ namespace ToDo.Tests.Storage
         }
         #endregion
 
-        private IToDoTask CreateNewMockTask(string description, bool hasCompleted)
+        private static IToDoTask CreateNewMockTask(string description, bool hasCompleted)
         {
             var newTask = new Mock<IToDoTask>();
             newTask.SetupGet(task => task.Description).Returns(description);
