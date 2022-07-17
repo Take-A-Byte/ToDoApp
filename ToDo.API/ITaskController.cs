@@ -2,7 +2,7 @@
 {
     public interface ITaskController
     {
-        Task<IReadOnlyList<IToDoTask>> GetAllTasks();
+        Task<IReadOnlyDictionary<long, IToDoTask>> GetAllTasks();
         Task<bool> AddTask(string description);
     }
 }

@@ -29,12 +29,12 @@ namespace ToDo.Core
             return await _taskStorage.AddNewTask((long)(_newIdForUse++), description);
         }
 
-        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks()
+        public async Task<IReadOnlyDictionary<long, IToDoTask>> GetAllTasks()
         {
             var tasks = await _taskStorage.GetAllTasks(CreateToDoTask);
             foreach (var task in tasks)
             {
-                ((ToDoTask)task).PropertyChanged += OnTaskAttributesChanged;
+                ((ToDoTask)task.Value).PropertyChanged += OnTaskAttributesChanged;
             }
 
             return tasks;

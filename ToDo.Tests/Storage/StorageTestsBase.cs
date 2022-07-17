@@ -49,10 +49,10 @@ namespace ToDo.Tests.Storage
 
             // then
             Assert.AreEqual(NumberOfTasksInStorage(), tasks.Count);
-            Assert.AreEqual(task1.Description, tasks[0].Description);
-            Assert.AreEqual(task2.Description, tasks[1].Description);
-            Assert.AreEqual(task1.HasCompleted, tasks[0].HasCompleted);
-            Assert.AreEqual(task2.HasCompleted, tasks[1].HasCompleted);
+            Assert.AreEqual(task1.Description, tasks[1].Description);
+            Assert.AreEqual(task2.Description, tasks[2].Description);
+            Assert.AreEqual(task1.HasCompleted, tasks[1].HasCompleted);
+            Assert.AreEqual(task2.HasCompleted, tasks[2].HasCompleted);
         }
 
         [Test]

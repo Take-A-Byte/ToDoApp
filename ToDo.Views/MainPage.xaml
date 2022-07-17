@@ -2,13 +2,28 @@
     x:Class="ToDo.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ToDo.Views"
+    xmlns:controls="using:ToDo.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-
-    </Grid>
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    mc:Ignorable="d">
+    <StackPanel>
+        <AutoSuggestBox
+            Margin="24"
+            IsTabStop="False"
+            PlaceholderText="Type a control name"
+            QueryIcon="Find"
+            QuerySubmitted="Control2_QuerySubmitted"
+            SuggestionChosen="Control2_SuggestionChosen"
+            TabIndex="1"
+            TextChanged="Control2_TextChanged" />
+        <StackPanel
+            x:Name="Alltasks"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            Spacing="4">
+            <controls:EditableTask CurrentTaskState="Added" TaskDescription="This is my new task" />
+            <controls:EditableTask CurrentTaskState="Adding" />
+        </StackPanel>
+    </StackPanel>
 </Page>

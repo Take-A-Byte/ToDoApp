@@ -68,7 +68,7 @@ namespace ToDo.Storage
             return taskAdded;
         }
 
-        public async Task<IReadOnlyList<IToDoTask>> GetAllTasks(Func<long, string, bool, IToDoTask> taskCreator)
+        public async Task<IReadOnlyDictionary<long, IToDoTask>> GetAllTasks(Func<long, string, bool, IToDoTask> taskCreator)
         {
             var getAllCommand = _sqLiteConnection.CreateCommand();
             getAllCommand.CommandText =
@@ -77,13 +77,14 @@ namespace ToDo.Storage
                     ";
             using (var reader = await getAllCommand.ExecuteReaderAsync())
             {
-                List<IToDoTask> tasks = new List<IToDoTask>();
+                Dictionary<long, IToDoTask> tasks = new Dictionary<long, IToDoTask>();
                 while (reader.Read())
                 {
-                    tasks.Add(taskCreator(reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2)));
+                    long id = reader.GetInt64(0);
+                    tasks.Add(id, taskCreator(id, reader.GetString(1), reader.GetBoolean(2)));
                 }
 
-                return tasks.AsReadOnly();
+                return tasks;
             }
         }
 

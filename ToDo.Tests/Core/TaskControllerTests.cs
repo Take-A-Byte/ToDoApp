@@ -35,10 +35,10 @@ namespace ToDo.Tests.Core
             _mockTaskStorage.Setup(storage => storage.GetAllTasks(It.IsAny<Func<long, string, bool, IToDoTask>>()))
                 .ReturnsAsync((Func<long, string, bool, IToDoTask> actualTaskCreator) =>
                 {
-                    List<IToDoTask> actualTasks = new List<IToDoTask>();
+                    Dictionary<long, IToDoTask> actualTasks = new Dictionary<long, IToDoTask>();
                     foreach(var task in _tasks)
                     {
-                        actualTasks.Add(actualTaskCreator(task.Id, task.Description, task.HasCompleted));
+                        actualTasks.Add(task.Id, actualTaskCreator(task.Id, task.Description, task.HasCompleted));
                     }
                     return actualTasks;
                 }
@@ -106,10 +106,10 @@ namespace ToDo.Tests.Core
 
             //then
             Assert.AreEqual(_tasks.Count, retrivedTasks.Count);
-            Assert.AreEqual(_tasks[0].Description, retrivedTasks[0].Description);
-            Assert.AreEqual(_tasks[1].Description, retrivedTasks[1].Description);
-            Assert.AreEqual(_tasks[0].HasCompleted, retrivedTasks[0].HasCompleted);
-            Assert.AreEqual(_tasks[1].HasCompleted, retrivedTasks[1].HasCompleted);
+            Assert.AreEqual(_tasks[0].Description, retrivedTasks[1].Description);
+            Assert.AreEqual(_tasks[1].Description, retrivedTasks[2].Description);
+            Assert.AreEqual(_tasks[0].HasCompleted, retrivedTasks[1].HasCompleted);
+            Assert.AreEqual(_tasks[1].HasCompleted, retrivedTasks[2].HasCompleted);
         }
 
         [Test]
@@ -124,17 +124,17 @@ namespace ToDo.Tests.Core
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
-            retrivedTasks[0].Description = description;
+            retrivedTasks[1].Description = description;
 
             // then
-            Assert.AreEqual(oldDescriptionOfTask1, retrivedTasks[0].Description);
+            Assert.AreEqual(oldDescriptionOfTask1, retrivedTasks[1].Description);
         }
 
         [Test]
         public async Task OnDescriptionSetWithRetrivedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
         {
             // given
-            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
+            _tasks.Add(CreateMockTask(0, "This is test task 1", false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -153,11 +153,11 @@ namespace ToDo.Tests.Core
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
-            bool newHasCompleted = !retrivedTasks[0].HasCompleted;
-            retrivedTasks[0].HasCompleted = newHasCompleted;
+            bool newHasCompleted = !retrivedTasks[1].HasCompleted;
+            retrivedTasks[1].HasCompleted = newHasCompleted;
 
             // then
-            Assert.AreEqual(newHasCompleted, retrivedTasks[0].HasCompleted);
+            Assert.AreEqual(newHasCompleted, retrivedTasks[1].HasCompleted);
         }
 
         private static IToDoTask CreateMockTask(long id, string description, bool hasCompleted)
