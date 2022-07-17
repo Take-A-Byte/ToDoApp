@@ -1,4 +1,7 @@
-﻿namespace ToDo.API
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace ToDo.API
 {
     public interface ITaskController
     {

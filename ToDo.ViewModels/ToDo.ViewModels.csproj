@@ -129,6 +129,12 @@
       <Version>6.2.13</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ToDo.API\ToDo.API.csproj">
+      <Project>{dfe95b6b-6467-4935-948e-76392ea509a2}</Project>
+      <Name>ToDo.API</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

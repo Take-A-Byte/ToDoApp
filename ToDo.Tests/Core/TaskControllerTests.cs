@@ -1,5 +1,5 @@
-﻿using Moq;
-using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +9,7 @@ using ToDo.Core;
 
 namespace ToDo.Tests.Core
 {
+    [TestClass]
     public class TaskControllerTests
     {
         private List<IToDoTask> _tasks;
@@ -16,7 +17,7 @@ namespace ToDo.Tests.Core
 
         private TaskController _taskController;
 
-        [SetUp]
+        [TestInitialize]
         public void SetUp()
         {
             _tasks = new List<IToDoTask>();
@@ -37,7 +38,7 @@ namespace ToDo.Tests.Core
                 .ReturnsAsync((Func<long, string, bool, IToDoTask> realTaskCreator) =>
                 {
                     Dictionary<long, IToDoTask> actualTasks = new Dictionary<long, IToDoTask>();
-                    foreach(var task in _tasks)
+                    foreach (var task in _tasks)
                     {
                         actualTasks.Add(task.Id, realTaskCreator(task.Id, task.Description, task.HasCompleted));
                     }
@@ -58,7 +59,7 @@ namespace ToDo.Tests.Core
                 });
         }
 
-        [TearDown]
+        [TestCleanup]
         public void CleanUp()
         {
             _tasks.Clear();
@@ -67,10 +68,10 @@ namespace ToDo.Tests.Core
             _taskController = null;
         }
 
-        [Test]
-        [TestCase()]
-        [TestCase("")]
-        [TestCase("   ")]
+        [DataTestMethod]
+        [DataRow()]
+        [DataRow("")]
+        [DataRow("   ")]
         public async Task OnAddTask_WithEmptyDescription_AndReturnsFalse_AndDoesNotAddStorage(string description = null)
         {
             // given
@@ -84,7 +85,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(0, _tasks.Count);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnAddTask_WithNonEmptyDescription_ReturnsTrue_AndAddsToStorage()
         {
             // when
@@ -95,7 +96,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(1, _tasks.Count);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnGetAllTasks_GetAllTasksFromStorage()
         {
             // given
@@ -113,10 +114,10 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(_tasks[1].HasCompleted, retrivedTasks[2].HasCompleted);
         }
 
-        [Test]
-        [TestCase()]
-        [TestCase("")]
-        [TestCase("   ")]
+        [TestMethod]
+        [DataRow()]
+        [DataRow("")]
+        [DataRow("   ")]
         public async Task OnDescriptionSetOnAddedTask_WithEmptyString_DoesNotUpdateDescription(string description = null)
         {
             // given
@@ -130,7 +131,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(oldDescriptionOfTask1, addedTask.Description);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnDescriptionSetWithAddedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
         {
             // given
@@ -144,7 +145,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(newDescription, addedTasks.Description);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnHasCompletedSetOnAddedTask_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
         {
             // given
@@ -158,10 +159,10 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(newHasCompleted, addedTasks.HasCompleted);
         }
 
-        [Test]
-        [TestCase()]
-        [TestCase("")]
-        [TestCase("   ")]
+        [TestMethod]
+        [DataRow()]
+        [DataRow("")]
+        [DataRow("   ")]
         public async Task OnDescriptionSetOnRetrivedTask_WithEmptyString_DoesNotUpdateDescription(string description = null)
         {
             // given
@@ -176,7 +177,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(oldDescriptionOfTask1, retrivedTasks[1].Description);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnDescriptionSetWithRetrivedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
         {
             // given
@@ -191,7 +192,7 @@ namespace ToDo.Tests.Core
             Assert.AreEqual(newDescription, retrivedTasks[0].Description);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnHasCompletedSetOnRetrivedTask_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
         {
             // given
@@ -208,16 +209,15 @@ namespace ToDo.Tests.Core
 
         private static IToDoTask CreateMockTask(long id, string description, bool hasCompleted)
         {
-            var task = new Mock<IToDoTask>();
-            task.SetupGet(t => t.Id).Returns(id);
-            task.SetupGet(task => task.Description).Returns(() => description);
-            task.SetupSet(task => task.Description = It.IsAny<string>())
+            var mockTask = new Mock<IToDoTask>();
+            mockTask.SetupGet(t => t.Id).Returns(id);
+            mockTask.SetupGet(task => task.Description).Returns(() => description);
+            mockTask.SetupSet(task => task.Description = It.IsAny<string>())
                 .Callback<string>((newDescription) => description = newDescription);
-            task.SetupGet(task => task.HasCompleted).Returns(() => hasCompleted);
-            task.SetupSet(task => task.HasCompleted = It.IsAny<bool>())
+            mockTask.SetupGet(task => task.HasCompleted).Returns(() => hasCompleted);
+            mockTask.SetupSet(task => task.HasCompleted = It.IsAny<bool>())
                 .Callback<bool>((newHasCompleted) => hasCompleted = newHasCompleted);
-            return task.Object;
+            return mockTask.Object;
         }
-
     }
 }

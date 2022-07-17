@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using ToDo.API;
 
 namespace ToDo.Core
@@ -18,11 +20,10 @@ namespace ToDo.Core
         {
             if (string.IsNullOrWhiteSpace(description))
             {
-                Debug.Fail("description should not be empty");
                 return null;
             }
 
-            if(_newIdForUse == null)
+            if (_newIdForUse == null)
             {
                 _newIdForUse = await _taskStorage.GetTotalNumberOfTasks();
             }
@@ -63,6 +64,5 @@ namespace ToDo.Core
             retrivedTask.PropertyChanged += OnTaskAttributesChanged;
             return retrivedTask;
         }
-
     }
 }

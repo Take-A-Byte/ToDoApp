@@ -21,11 +21,11 @@ namespace ToDo.Core
 
         public string Description
         {
-            get 
+            get
             {
-                return _description; 
+                return _description;
             }
-            set 
+            set
             {
                 if (_description != value && !string.IsNullOrWhiteSpace(value))
                 {
@@ -34,7 +34,7 @@ namespace ToDo.Core
                 }
             }
         }
-        
+
         public bool HasCompleted
         {
             get

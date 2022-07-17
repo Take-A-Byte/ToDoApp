@@ -1,42 +1,47 @@
-using NUnit.Framework;
-using Moq;
+﻿using Moq;
 using System.IO;
 using ToDo.API;
 using Microsoft.Data.Sqlite;
 using ToDo.Storage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Windows.Storage;
 
 namespace ToDo.Tests.Storage
 {
+    [TestClass]
     public class SQLiteStorageTests : StorageTestsBase
     {
-        private const string _kDatabasePath = "testDatabase.db";
+        private string DatabasePath
+        {
+            get => Path.Combine(ApplicationData.Current.LocalFolder.Path, "testDatabase.db");
+        }
 
-        [SetUp]
+        [TestInitialize]
         public void SetUp()
         {
-            _storage = new SQLiteStorage(_kDatabasePath);
+            _storage = new SQLiteStorage(DatabasePath);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void CleanUp()
         {
-            ((SQLiteStorage)_storage).Dispose();
-            File.Delete(_kDatabasePath);
+            (_storage as SQLiteStorage)?.Dispose();
+            File.Delete(DatabasePath);
         }
 
-        [TestCase]
+        [TestMethod]
         public override void OnObjectCreation_StorageFileExists()
         {
             // when
             // storage object is created in setup
 
             // then
-            Assert.IsTrue(File.Exists(_kDatabasePath));
+            Assert.IsTrue(File.Exists(DatabasePath));
         }
 
         protected override void AddTaskToTestStorage(IToDoTask task)
         {
-            using (var connection = new SqliteConnection($"Data Source={_kDatabasePath}"))
+            using (var connection = new SqliteConnection($"Data Source={DatabasePath}"))
             {
                 connection.Open();
 
@@ -55,7 +60,7 @@ namespace ToDo.Tests.Storage
 
         protected override int NumberOfTasksInStorage()
         {
-            using (var connection = new SqliteConnection($"Data Source={_kDatabasePath}"))
+            using (var connection = new SqliteConnection($"Data Source={DatabasePath}"))
             {
                 connection.Open();
 
@@ -74,7 +79,7 @@ namespace ToDo.Tests.Storage
 
         protected override IToDoTask GetTaskWithId(long id)
         {
-            using (var connection = new SqliteConnection($"Data Source={_kDatabasePath}"))
+            using (var connection = new SqliteConnection($"Data Source={DatabasePath}"))
             {
                 connection.Open();
 

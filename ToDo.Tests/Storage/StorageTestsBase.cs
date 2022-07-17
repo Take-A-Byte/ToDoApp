@@ -1,10 +1,11 @@
-﻿using Moq;
-using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System.Threading.Tasks;
 using ToDo.API;
 
 namespace ToDo.Tests.Storage
 {
+    [TestClass]
     public abstract class StorageTestsBase
     {
         protected ITaskStorage _storage;
@@ -13,10 +14,10 @@ namespace ToDo.Tests.Storage
         protected abstract IToDoTask GetTaskWithId(long id);
         protected abstract int NumberOfTasksInStorage();
 
-        [Test]
+        [TestMethod]
         public abstract void OnObjectCreation_StorageFileExists();
 
-        [Test]
+        [TestMethod]
         public async Task OnAddNewTask_ReturnsTrue_TaskIsSavedInStorage()
         {
             //given
@@ -36,7 +37,7 @@ namespace ToDo.Tests.Storage
             Assert.AreEqual(false, taskRetrivedFromStorage.HasCompleted);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnGetAllTasks_ReturnsTrue_RetrivesAllTasksInStorageWithCorrectDetails()
         {
             //given
@@ -57,7 +58,7 @@ namespace ToDo.Tests.Storage
             Assert.AreEqual(task2.HasCompleted, tasks[2].HasCompleted);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnGetTotalNumberOfTasks_ReturnsNumberOfTasksInStorage()
         {
             //given
@@ -75,7 +76,7 @@ namespace ToDo.Tests.Storage
         }
 
         #region UpdateTaskCompleteness
-        [Test]
+        [TestMethod]
         public async Task OnUpdateTaskCompletenessWithIncorrectID_ReturnsFalse_DoesNotUpdateStorage()
         {
             // when
@@ -85,7 +86,7 @@ namespace ToDo.Tests.Storage
             Assert.IsFalse(result);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnUpdateTaskCompletenessWithCorrectID_ReturnsTrue_UpdatesTaskInStorage()
         {
             // given 
@@ -105,7 +106,7 @@ namespace ToDo.Tests.Storage
         #endregion
 
         #region UpdateDescription
-        [Test]
+        [TestMethod]
         public async Task OnUpdateTaskDescriptionWithIncorrectID_ReturnsFalse_DoesNotUpdateStorage()
         {
             // when
@@ -115,7 +116,7 @@ namespace ToDo.Tests.Storage
             Assert.IsFalse(result);
         }
 
-        [Test]
+        [TestMethod]
         public async Task OnUpdateTaskDescriptionWithCorrectIDAndDescription_ReturnsTrue_UpdatesTaskInStorage()
         {
             // given 
@@ -136,11 +137,11 @@ namespace ToDo.Tests.Storage
 
         private IToDoTask CreateNewMockTask(long id, string description, bool hasCompleted)
         {
-            var task = new Mock<IToDoTask>();
-            task.SetupGet(t => t.Id).Returns(id);
-            task.SetupGet(task => task.Description).Returns(description);
-            task.SetupGet(task => task.HasCompleted).Returns(hasCompleted);
-            return task.Object;
+            var mockTask = new Mock<IToDoTask>();
+            mockTask.SetupGet(t => t.Id).Returns(id);
+            mockTask.SetupGet(task => task.Description).Returns(description);
+            mockTask.SetupGet(task => task.HasCompleted).Returns(hasCompleted);
+            return mockTask.Object;
         }
     }
 }

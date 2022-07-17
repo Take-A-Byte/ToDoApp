@@ -1,4 +1,8 @@
-﻿namespace ToDo.API
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace ToDo.API
 {
     public interface ITaskStorage
     {
