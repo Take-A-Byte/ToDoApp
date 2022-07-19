@@ -49,6 +49,7 @@ namespace ToDo.ViewModels
 
             foreach (var task in await _controller.GetAllTasks())
             {
+                _unfilteredTasks.Add(new EditableTaskViewModel(task.Value));
                 _tasks.Add(new EditableTaskViewModel(task.Value));
             }
         }
