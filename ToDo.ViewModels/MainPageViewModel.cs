@@ -9,7 +9,7 @@ namespace ToDo.ViewModels
     public class MainPageViewModel : BindableBase
     {
         private ITaskController _controller;
-        private List<EditableTaskViewModel> _unfilteredTasks;
+        private List<EditableTaskViewModel> _unfilteredTasks = new List<EditableTaskViewModel>();
         private ObservableCollection<EditableTaskViewModel> _tasks = new ObservableCollection<EditableTaskViewModel>();
         private Func<string, bool> _doesSatisfySearchQuery = new Func<string, bool>((description) => true);
         private EditableTaskViewModel _toBeAddedTask;
