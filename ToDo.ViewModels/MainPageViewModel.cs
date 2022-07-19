@@ -63,8 +63,8 @@ namespace ToDo.ViewModels
             _tasks.Clear();
             foreach (var task in _unfilteredTasks)
             {
-                _doesSatisfySearchQuery = new Func<string, bool>((description) => FuzzySharp.Fuzz.PartialRatio(searchKey, description) > 45);
-                if (string.IsNullOrWhiteSpace(searchKey) || _doesSatisfySearchQuery(task.Description))
+                _doesSatisfySearchQuery = new Func<string, bool>((description) => string.IsNullOrWhiteSpace(searchKey) || FuzzySharp.Fuzz.PartialRatio(searchKey, description) > 45);
+                if (_doesSatisfySearchQuery(task.Description))
                 {
                     _tasks.Add(task);
                 }
