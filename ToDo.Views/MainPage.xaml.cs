@@ -1,5 +1,9 @@
-﻿using Windows.UI.Xaml;
+﻿using ToDo.API;
+using ToDo.ViewModels;
+using Windows.UI;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
 
 namespace ToDo.Views
 {
@@ -8,19 +12,12 @@ namespace ToDo.Views
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        MainPageViewModel _mainPageVM;
+
         public MainPage()
         {
-            this.InitializeComponent();
-        }
-
-        private void Option_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Option_Unchecked(object sender, RoutedEventArgs e)
-        {
-
+            InitializeComponent();
+            _mainPageVM = new MainPageViewModel();
         }
 
         private void Control2_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -38,9 +35,18 @@ namespace ToDo.Views
 
         }
 
-        private void CheckboxTextChangeButton_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
+            base.OnNavigatedTo(e);
+            await _mainPageVM.Initialize((ITaskController)e.Parameter);
+        }
 
+        private void Alltasks_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            //if (args.ItemIndex % 2 != 0)
+            //{
+            //    args.ItemContainer.Background = new SolidColorBrush(Colors.AliceBlue);
+            //}
         }
     }
 }

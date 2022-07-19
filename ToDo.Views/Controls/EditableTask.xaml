@@ -7,10 +7,11 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     d:DesignHeight="32"
     d:DesignWidth="200"
+    Background="Black"
     Loaded="OnEditableTaskLoaded"
     TabIndex="0"
     mc:Ignorable="d">
-    <Grid Margin="15,0">
+    <Grid Margin="16,0" HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20" />
             <ColumnDefinition Width="*" />
@@ -18,7 +19,7 @@
         </Grid.ColumnDefinitions>
         <CheckBox
             x:Name="TaskCheckbox"
-            IsChecked="{x:Bind HasCompleted, Mode=TwoWay}"
+            IsChecked="{x:Bind ViewModel.HasCompleted, Mode=TwoWay}"
             IsEnabled="False"
             IsTabStop="False" />
         <TextBlock
@@ -26,24 +27,27 @@
             Grid.Column="1"
             Height="20"
             Margin="16,0"
-            Tapped="OnTaskLabelTapped" />
+            HorizontalAlignment="Stretch"
+            Tapped="OnTaskLabelTapped"
+            Text="{x:Bind ViewModel.Description, Mode=OneWay}" />
         <TextBox
             x:Name="TaskTextbox"
             Grid.Column="1"
-            Height="30"
+            Height="32"
             Margin="4,0"
             IsTabStop="True"
             LostFocus="OnTaskTextboxLostFocus"
             PlaceholderText="Add task description"
             PreviewKeyDown="OnTaskTextboxPreviewKeyDown"
             Style="{StaticResource ComboBoxTextBoxStyle}"
-            TabIndex="0" />
+            TabIndex="0"
+            Text="{x:Bind ViewModel.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <muxc:TeachingTip
             x:Name="InputErrorTeachingTip"
             BorderBrush="{ThemeResource SystemControlErrorTextForegroundBrush}"
             BorderThickness="2"
             IsLightDismissEnabled="True"
-            Subtitle="Write a description for task before adding">
+            PlacementMargin="50">
             <muxc:TeachingTip.IconSource>
                 <muxc:SymbolIconSource Symbol="Rename" />
             </muxc:TeachingTip.IconSource>

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
+using ToDo.API;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -9,10 +12,13 @@ namespace ToDo.Views
 {
     sealed partial class App : Application
     {
+        private ITaskController _taskController;
+
         public App()
         {
             InitializeComponent();
             Suspending += OnSuspending;
+            _taskController = ComponentsFactory.CreateTaskController(Path.Combine(ApplicationData.Current.LocalFolder.Path, "testDatabase.db"));
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
@@ -44,7 +50,7 @@ namespace ToDo.Views
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(MainPage), _taskController);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using ToDo.ViewModels;
 using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -7,23 +10,10 @@ using Windows.UI.Xaml.Input;
 
 namespace ToDo.Views.Controls
 {
-    public enum TaskState
-    {
-        Adding,
-        Added,
-        Editing
-    }
-
     public sealed partial class EditableTask : UserControl
     {
-        public static readonly DependencyProperty CurrentTaskStateProperty =
-            DependencyProperty.Register("CurrentTaskStateProperty", typeof(TaskState), typeof(EditableTask), new PropertyMetadata(TaskState.Added, OnTaskStateChanged));
-
-        public static readonly DependencyProperty HasCompletedProperty =
-            DependencyProperty.Register("HasCompleted", typeof(bool), typeof(EditableTask), new PropertyMetadata(false));
-
-        public static readonly DependencyProperty TaskDescriptionProperty =
-            DependencyProperty.Register("TaskDescription", typeof(string), typeof(EditableTask), new PropertyMetadata(string.Empty));
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register("ViewModel", typeof(EditableTaskViewModel), typeof(EditableTask), new PropertyMetadata(null));
 
         private DispatcherTimer _timer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(2500) };
 
@@ -33,39 +23,33 @@ namespace ToDo.Views.Controls
             _timer.Tick += OnInputErrorTeachingTipTimerTicked;
         }
 
-        public TaskState CurrentTaskState
+        public EditableTaskViewModel ViewModel
         {
-            get { return (TaskState)GetValue(CurrentTaskStateProperty); }
-            set { SetValue(CurrentTaskStateProperty, value); }
-        }
-
-        public bool HasCompleted
-        {
-            get { return (bool)GetValue(HasCompletedProperty); }
+            get { return (EditableTaskViewModel)GetValue(ViewModelProperty); }
             set
             {
-                if (CurrentTaskState == TaskState.Adding && value)
+                if (ViewModel != null)
                 {
-                    Debug.Fail("Task which is not yet added cannot be complete");
-                    return;
+                    ViewModel.IncorrectDescription -= ShowErrorTeachingTip;
+                    ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
                 }
 
-                SetValue(HasCompletedProperty, value);
+                if (value != null)
+                {
+                    value.IncorrectDescription += ShowErrorTeachingTip;
+                    value.PropertyChanged += OnViewModelPropertyChanged;
+                }
+                SetValue(ViewModelProperty, value);
             }
         }
 
-        public string TaskDescription
+        private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            get { return (string)GetValue(TaskDescriptionProperty); }
-            set
+            switch (e.PropertyName)
             {
-                if (CurrentTaskState == TaskState.Adding && string.IsNullOrEmpty(value))
-                {
-                    Debug.Fail("Task which is not yet added cannot have task description");
-                    return;
-                }
-
-                SetValue(TaskDescriptionProperty, value);
+                case nameof(ViewModel.CurrentTaskState):
+                    UpdateState();
+                    break;
             }
         }
 
@@ -77,7 +61,7 @@ namespace ToDo.Views.Controls
 
         private void UpdateState()
         {
-            switch (CurrentTaskState)
+            switch (ViewModel.CurrentTaskState)
             {
                 case TaskState.Adding:
                     VisualStateManager.GoToState(this, "AddingTask", false);
@@ -95,84 +79,56 @@ namespace ToDo.Views.Controls
             }
         }
 
-        private void AcceptChanges()
-        {
-            if (!String.IsNullOrEmpty(TaskTextbox.Text))
-            {
-                TaskLabel.Text = TaskTextbox.Text;
-                CurrentTaskState = TaskState.Added;
-            }
-            else
-            {
-                InputErrorTeachingTip.IsOpen = true;
-                _timer.Start();
-                SetProgramticFocusOnTextbox();
-            }
-        }
-
         private void OnInputErrorTeachingTipTimerTicked(object sender, object e)
         {
             _timer.Stop();
             InputErrorTeachingTip.IsOpen = false;
         }
 
-        private void DiscardChanges()
+        private void ShowErrorTeachingTip(string errorMessage)
         {
-            if (CurrentTaskState == TaskState.Adding)
-            {
-                TaskTextbox.Text = String.Empty;
-            }
-            else
-            {
-                CurrentTaskState = TaskState.Added;
-                TaskTextbox.Text = TaskLabel.Text;
-            }
+            InputErrorTeachingTip.Subtitle = errorMessage;
+            InputErrorTeachingTip.IsOpen = true;
+            _timer.Start();
+            SetProgramticFocusOnTextbox();
         }
 
         private void OnEditableTaskLoaded(object sender, RoutedEventArgs e)
         {
-            TaskLabel.Text = TaskDescription;
             UpdateState();
         }
 
-        private static void OnTaskStateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            EditableTask editableTask = (EditableTask)d;
-            editableTask.UpdateState();
-        }
-
-        private void OnTaskTextboxPreviewKeyDown(object sender, KeyRoutedEventArgs e)
+        private async void OnTaskTextboxPreviewKeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == VirtualKey.Enter)
             {
-                AcceptChanges();
+                await ViewModel.AcceptChanges();
             }
             else if (e.Key == VirtualKey.Escape)
             {
-                DiscardChanges();
+                ViewModel.DiscardChanges();
             }
         }
 
         private void OnTaskTextboxLostFocus(object sender, RoutedEventArgs e)
         {
-            DiscardChanges();
+            ViewModel.DiscardChanges();
         }
 
         private void OnTaskLabelTapped(object sender, TappedRoutedEventArgs e)
         {
-            TaskCheckbox.IsChecked = !TaskCheckbox.IsChecked;
+            ViewModel.HasCompleted = !ViewModel.HasCompleted;
         }
 
-        private void OnTaskStateUpdateButtonClicked(object sender, TappedRoutedEventArgs e)
+        private async void OnTaskStateUpdateButtonClicked(object sender, TappedRoutedEventArgs e)
         {
-            if (CurrentTaskState == TaskState.Added)
+            if (ViewModel.CurrentTaskState == TaskState.Added)
             {
-                TaskTextbox.Text = TaskLabel.Text;
-                CurrentTaskState = TaskState.Editing;
+                ViewModel.SwitchToEdit();
             }
             else
             {
-                AcceptChanges();
+                await ViewModel.AcceptChanges();
             }
         }
     }

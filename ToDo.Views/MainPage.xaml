@@ -5,25 +5,73 @@
     xmlns:controls="using:ToDo.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="using:ToDo.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
-    <StackPanel>
-        <AutoSuggestBox
-            Margin="24"
-            IsTabStop="False"
-            PlaceholderText="Type a control name"
-            QueryIcon="Find"
-            QuerySubmitted="Control2_QuerySubmitted"
-            SuggestionChosen="Control2_SuggestionChosen"
-            TabIndex="1"
-            TextChanged="Control2_TextChanged" />
-        <StackPanel
+    <Page.Resources>
+        <Style x:Key="HorizontalDividerRectangleStyle" TargetType="Rectangle">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Fill" Value="{ThemeResource SystemControlHyperlinkBaseMediumHighBrush}" />
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <ListView
             x:Name="Alltasks"
+            Grid.Row="1"
+            HorizontalContentAlignment="Stretch"
+            ContainerContentChanging="Alltasks_ContainerContentChanging"
+            ItemsSource="{x:Bind _mainPageVM.Tasks}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
-            Spacing="4">
-            <controls:EditableTask CurrentTaskState="Added" TaskDescription="This is my new task" />
-            <controls:EditableTask CurrentTaskState="Adding" />
-        </StackPanel>
-    </StackPanel>
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodel:EditableTaskViewModel">
+                    <Border
+                        Margin="4,1,4,0"
+                        BorderBrush="{ThemeResource SystemControlTransientBorderBrush}"
+                        BorderThickness="1">
+                        <controls:EditableTask ViewModel="{x:Bind}" />
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Rectangle VerticalAlignment="Bottom" Style="{StaticResource HorizontalDividerRectangleStyle}" />
+        <Border HorizontalAlignment="Stretch" Background="{ThemeResource SystemControlPageBackgroundListLowBrush}">
+            <AutoSuggestBox
+                Margin="24,16,24,8"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                IsTabStop="False"
+                PlaceholderText="Type a control name"
+                QueryIcon="Find"
+                QuerySubmitted="Control2_QuerySubmitted"
+                SuggestionChosen="Control2_SuggestionChosen"
+                TabIndex="1"
+                TextChanged="Control2_TextChanged" />
+        </Border>
+
+        <Rectangle
+            Grid.Row="2"
+            VerticalAlignment="Top"
+            Style="{StaticResource HorizontalDividerRectangleStyle}" />
+        <Border Grid.Row="2" Background="{ThemeResource SystemControlPageBackgroundListLowBrush}">
+            <controls:EditableTask
+                Margin="0,8,0,16"
+                HorizontalAlignment="Stretch"
+                ViewModel="{x:Bind _mainPageVM.ToBeAddedTask, Mode=OneWay}" />
+        </Border>
+    </Grid>
 </Page>
