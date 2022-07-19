@@ -1,4 +1,6 @@
-﻿using ToDo.API;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ToDo.API;
 using ToDo.ViewModels;
 using Windows.UI;
 using Windows.UI.Xaml.Controls;
@@ -14,25 +16,20 @@ namespace ToDo.Views
     {
         MainPageViewModel _mainPageVM;
 
+        public List<string> _taskDescriptions { get => _mainPageVM.Tasks.Select(task => task.Description).ToList(); }
+
         public MainPage()
         {
             InitializeComponent();
             _mainPageVM = new MainPageViewModel();
         }
 
-        private void Control2_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private void SearchQueryChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-
-        }
-
-        private void Control2_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-
-        }
-
-        private void Control2_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
-        {
-
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput && args.CheckCurrent())
+            {
+                _mainPageVM.FilterTasks(sender.Text);
+            }
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)

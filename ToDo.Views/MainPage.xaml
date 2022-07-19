@@ -54,12 +54,15 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
                 IsTabStop="False"
-                PlaceholderText="Type a control name"
-                QueryIcon="Find"
-                QuerySubmitted="Control2_QuerySubmitted"
-                SuggestionChosen="Control2_SuggestionChosen"
+                PlaceholderText="Search by description"
                 TabIndex="1"
-                TextChanged="Control2_TextChanged" />
+                TextChanged="SearchQueryChanged">
+                <AutoSuggestBox.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodel:EditableTaskViewModel">
+                        <TextBlock Text="{x:Bind Description}" />
+                    </DataTemplate>
+                </AutoSuggestBox.ItemTemplate>
+            </AutoSuggestBox>
         </Border>
 
         <Rectangle

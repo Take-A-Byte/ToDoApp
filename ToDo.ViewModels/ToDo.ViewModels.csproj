@@ -127,6 +127,9 @@
     <EmbeddedResource Include="Properties\ToDo.ViewModels.rd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="FuzzySharp">
+      <Version>2.0.2</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.13</Version>
     </PackageReference>
