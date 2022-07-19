@@ -11,6 +11,10 @@ namespace ToDo.Storage
     {
         private SqliteConnection _sqLiteConnection;
 
+        /// <summary>
+        /// Create a SQlite based storage object
+        /// </summary>
+        /// <param name="databasePath">Path at which database file should be created</param>
         public SQLiteStorage(string databasePath)
         {
             _sqLiteConnection = new SqliteConnection($"Data Source={databasePath}");

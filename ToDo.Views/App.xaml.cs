@@ -18,7 +18,7 @@ namespace ToDo.Views
         {
             InitializeComponent();
             Suspending += OnSuspending;
-            _taskController = ComponentsFactory.CreateTaskController(Path.Combine(ApplicationData.Current.LocalFolder.Path, "testDatabase.db"));
+            _taskController = ComponentsFactory.CreateTaskController(ApplicationData.Current.LocalFolder.Path);
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

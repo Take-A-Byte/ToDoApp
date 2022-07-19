@@ -11,6 +11,10 @@ namespace ToDo.Core
         private readonly ITaskStorage _taskStorage;
         private long? _newIdForUse = null;
 
+        /// <summary>
+        /// Creates object of Task Controller
+        /// </summary>
+        /// <param name="taskStorage">Storage to be used to preserve tasks' states</param>
         public TaskController(ITaskStorage taskStorage)
         {
             _taskStorage = taskStorage;
