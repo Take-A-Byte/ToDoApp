@@ -6,7 +6,7 @@ No more forgetting things ToDo. Create a list of things to be done with ToDo and
 - Min version of Windows - Windows 10 version 1809
 
 ### Steps to install application on Windows machine
-1. Form the [releases](https://github.com/Take-A-Byte/ToDoApp/releases) download the latest release package named (`ToDo_x.x.x.x.7z`) and unzip it
+1. Form the [releases](https://github.com/Take-A-Byte/ToDoApp/releases) download the latest release package named (`ToDo_x.x.x.x.zip`) and unzip it
 2. Run `ToDo.cer` file to install certificate needed for installing the application.
 3. Click on next until you see the screen as below. Here under `Store Location` select `Local Machine` 
 <img src="https://user-images.githubusercontent.com/29909785/179803887-78820752-116e-4759-b3d6-2c29b5251242.png" width="450" height="500">
