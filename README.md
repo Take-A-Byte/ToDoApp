@@ -2,12 +2,10 @@
 No more forgetting things ToDo. Create a list of things to be done with ToDo and have the satisfaction of checking all of them off.
 
 # Getting started
-This document will guide you through steps to
-1. [Start using the application](https://github.com/Take-A-Byte/ToDoApp/edit/master/README.md#use-the-application-on-windows)
-2. [Integrate it in your own application](https://github.com/Take-A-Byte/ToDoApp/edit/master/README.md#integrate-sdk-in-your-application)
+### Prerequisite
+- Min version of Windows - Windows 10 version 1809
 
-## Use the application on Windows
-Prerequisite - You should have a Windows 10 version 1809
+### Steps to install application on Windows machine
 1. Form the [releases]() download the latest release package.
 2. Run `ToDo_1.0.0.0_x64.cer` file to install certificate needed for installing the application.
 3. In the third step of installing certificate, please choose `Place all certificates in the following store`.
