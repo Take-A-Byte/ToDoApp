@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using ToDo.API;
 using ToDo.Core;
 
+using static ToDo.Tests.Helpers.ToDoTaskHelpers;
+
 namespace ToDo.Tests.Core
 {
     [TestClass]
@@ -100,8 +102,8 @@ namespace ToDo.Tests.Core
         public async Task OnGetAllTasks_GetAllTasksFromStorage()
         {
             // given
-            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
-            _tasks.Add(CreateMockTask(2, "This is test task 2", true));
+            _tasks.Add(CreateNewMockTask(1, "This is test task 1", false));
+            _tasks.Add(CreateNewMockTask(2, "This is test task 2", true));
 
             // when
             var retrivedTasks = await _taskController.GetAllTasks();
@@ -167,7 +169,7 @@ namespace ToDo.Tests.Core
         {
             // given
             string oldDescriptionOfTask1 = "This is test task 1";
-            _tasks.Add(CreateMockTask(1, oldDescriptionOfTask1, false));
+            _tasks.Add(CreateNewMockTask(1, oldDescriptionOfTask1, false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -181,7 +183,7 @@ namespace ToDo.Tests.Core
         public async Task OnDescriptionSetWithRetrivedTask_WithNonEmptyString_UpdatesDescription_AndRaisesDescriptionChangedEvent()
         {
             // given
-            _tasks.Add(CreateMockTask(0, "This is test task 1", false));
+            _tasks.Add(CreateNewMockTask(0, "This is test task 1", false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -196,7 +198,7 @@ namespace ToDo.Tests.Core
         public async Task OnHasCompletedSetOnRetrivedTask_UpdatesHasCompleted_AndRaisesHasCompletedChangedEventAsync()
         {
             // given
-            _tasks.Add(CreateMockTask(1, "This is test task 1", false));
+            _tasks.Add(CreateNewMockTask(1, "This is test task 1", false));
             var retrivedTasks = await _taskController.GetAllTasks();
 
             // when
@@ -205,19 +207,6 @@ namespace ToDo.Tests.Core
 
             // then
             Assert.AreEqual(newHasCompleted, retrivedTasks[1].HasCompleted);
-        }
-
-        private static IToDoTask CreateMockTask(long id, string description, bool hasCompleted)
-        {
-            var mockTask = new Mock<IToDoTask>();
-            mockTask.SetupGet(t => t.Id).Returns(id);
-            mockTask.SetupGet(task => task.Description).Returns(() => description);
-            mockTask.SetupSet(task => task.Description = It.IsAny<string>())
-                .Callback<string>((newDescription) => description = newDescription);
-            mockTask.SetupGet(task => task.HasCompleted).Returns(() => hasCompleted);
-            mockTask.SetupSet(task => task.HasCompleted = It.IsAny<bool>())
-                .Callback<bool>((newHasCompleted) => hasCompleted = newHasCompleted);
-            return mockTask.Object;
         }
     }
 }

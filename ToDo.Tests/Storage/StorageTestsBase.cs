@@ -1,7 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System.Threading.Tasks;
 using ToDo.API;
+
+using static ToDo.Tests.Helpers.ToDoTaskHelpers;
 
 namespace ToDo.Tests.Storage
 {
@@ -134,14 +135,5 @@ namespace ToDo.Tests.Storage
             Assert.AreEqual(newTask.HasCompleted, taskFromStorage.HasCompleted);
         }
         #endregion
-
-        private IToDoTask CreateNewMockTask(long id, string description, bool hasCompleted)
-        {
-            var mockTask = new Mock<IToDoTask>();
-            mockTask.SetupGet(t => t.Id).Returns(id);
-            mockTask.SetupGet(task => task.Description).Returns(description);
-            mockTask.SetupGet(task => task.HasCompleted).Returns(hasCompleted);
-            return mockTask.Object;
-        }
     }
 }
