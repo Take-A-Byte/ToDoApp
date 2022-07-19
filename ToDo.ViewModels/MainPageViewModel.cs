@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using ToDo.API;
 
@@ -15,13 +14,13 @@ namespace ToDo.ViewModels
         private Func<string, bool> _doesSatisfySearchQuery = new Func<string, bool>((description) => true);
         private EditableTaskViewModel _toBeAddedTask;
 
-        public ReadOnlyObservableCollection<EditableTaskViewModel> Tasks { get; }
-
         public MainPageViewModel()
         {
             Tasks = new ReadOnlyObservableCollection<EditableTaskViewModel>(_tasks);
             ToBeAddedTask = new EditableTaskViewModel();
         }
+
+        public ReadOnlyObservableCollection<EditableTaskViewModel> Tasks { get; }
 
         public EditableTaskViewModel ToBeAddedTask
         {
