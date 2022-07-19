@@ -40,13 +40,5 @@ namespace ToDo.Views
             base.OnNavigatedTo(e);
             await _mainPageVM.Initialize((ITaskController)e.Parameter);
         }
-
-        private void Alltasks_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
-        {
-            //if (args.ItemIndex % 2 != 0)
-            //{
-            //    args.ItemContainer.Background = new SolidColorBrush(Colors.AliceBlue);
-            //}
-        }
     }
 }

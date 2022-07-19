@@ -26,7 +26,6 @@
             x:Name="Alltasks"
             Grid.Row="1"
             HorizontalContentAlignment="Stretch"
-            ContainerContentChanging="Alltasks_ContainerContentChanging"
             ItemsSource="{x:Bind _mainPageVM.Tasks}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
