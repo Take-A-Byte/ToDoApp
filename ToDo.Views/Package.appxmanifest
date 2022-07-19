@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="b37bf127-9859-4856-85fa-e9a6f217479d"
+    Name="ToDob37bf127-9859-4856-85fa-e9a6f217479d"
     Publisher="CN=Shantanu Methikar"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="b37bf127-9859-4856-85fa-e9a6f217479d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>ToDo.Views</DisplayName>
+    <DisplayName>ToDo</DisplayName>
     <PublisherDisplayName>Shantanu Methikar</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -32,18 +32,14 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="ToDo.Views.App">
       <uap:VisualElements
-        DisplayName="ToDo.Views"
+        DisplayName="ToDo"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="ToDo.Views"
+        Description="No more forgetting things ToDo. Create a list of things to be done with ToDo and have the satisfaction of checking all of them off."
         BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
-
-  <Capabilities>
-    <Capability Name="internetClient" />
-  </Capabilities>
 </Package>
