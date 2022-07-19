@@ -48,18 +48,14 @@ namespace ToDo.ViewModels
 
             foreach (var task in await _controller.GetAllTasks())
             {
-                _unfilteredTasks.Add(new EditableTaskViewModel(task.Value));
-                _tasks.Add(new EditableTaskViewModel(task.Value));
+                var taskViewModel = new EditableTaskViewModel(task.Value);
+                _unfilteredTasks.Add(taskViewModel);
+                _tasks.Add(taskViewModel);
             }
         }
 
         public void FilterTasks(string searchKey)
         {
-            if (_unfilteredTasks == null)
-            {
-                _unfilteredTasks = new List<EditableTaskViewModel>(_tasks);
-            }
-
             _tasks.Clear();
             foreach (var task in _unfilteredTasks)
             {
