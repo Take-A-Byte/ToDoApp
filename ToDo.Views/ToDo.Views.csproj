@@ -220,10 +220,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ToDo.API\ToDo.API.csproj">
-      <Project>{DFE95B6B-6467-4935-948E-76392EA509A2}</Project>
-      <Name>ToDo.API</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ToDo.AppFactory\ToDo.AppFactory.csproj">
       <Project>{12a5731a-01dd-4aca-9758-94f75d10cbd9}</Project>
       <Name>ToDo.AppFactory</Name>

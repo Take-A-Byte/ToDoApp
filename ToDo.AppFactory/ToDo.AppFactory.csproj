@@ -111,14 +111,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ToDo.API\ToDo.API.csproj">
-      <Project>{dfe95b6b-6467-4935-948e-76392ea509a2}</Project>
-      <Name>ToDo.API</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ToDo.Core\ToDo.Core.csproj">
-      <Project>{4f9137d0-fe18-4df0-aad8-d83709f8cbcc}</Project>
-      <Name>ToDo.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ToDo.Storage\ToDo.Storage.csproj">
       <Project>{85760d52-d51a-470f-af75-ed6799eebbc2}</Project>
       <Name>ToDo.Storage</Name>
