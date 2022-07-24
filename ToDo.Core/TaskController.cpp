@@ -14,24 +14,22 @@ TaskController::TaskController(API::ITaskStorage &taskStorage) {
   _taskStorage = &taskStorage;
 }
 
-std::optional<std::reference_wrapper<API::IToDoTask>>
-TaskController::AddTask(std::string description) {
+void TaskController::AddTask(
+    std::string description,
+    std::function<void(std::optional<std::reference_wrapper<API::IToDoTask>>)>
+        callback) {
   if (description.empty()) {
-    return std::nullopt;
+    return callback(std::nullopt);
   }
 
-  auto getNewAddedTask =
-      std::async(std::launch::async, [&]() -> API::IToDoTask & {
-        if (!_newIdForUse) {
-          _newIdForUse = _taskStorage->GetTotalNumberOfTasks();
-        }
+  auto getNewAddedTask = std::async(std::launch::async, [&]() {
+    if (!_newIdForUse) {
+      _newIdForUse = _taskStorage->GetTotalNumberOfTasks();
+    }
 
-        return _taskStorage->AddNewTask((*_newIdForUse)++, description,
-                                        CreateTask);
-      });
-
-  return std::optional<std::reference_wrapper<API::IToDoTask>>{
-      getNewAddedTask.get()};
+    callback(std::optional<std::reference_wrapper<API::IToDoTask>>{
+        _taskStorage->AddNewTask((*_newIdForUse)++, description, CreateTask)});
+  });
 }
 
 void TaskController::OnTaskAttributesChanged(ToDoTask &sender,
@@ -49,24 +47,21 @@ void TaskController::OnTaskAttributesChanged(ToDoTask &sender,
   }
 }
 
-std::vector<std::reference_wrapper<API::IToDoTask>>
-TaskController::GetAlltasks() {
-  auto getAllTasks = std::async(
-      std::launch::async,
-      [&]() -> std::vector<std::reference_wrapper<API::IToDoTask>> {
-        auto tasks = _taskStorage->GetAllTasks();
-        for (auto const &refTask : tasks) {
-          ToDoTask &task =
-              (ToDoTask &)(std::unwrap_reference_t<API::IToDoTask &>(refTask));
-          task.RegisterForPropertyChanged(
-              [&](ToDoTask &sender, TaskAttribute changedAttribute) {
-                OnTaskAttributesChanged(sender, changedAttribute);
-              });
-        }
+void TaskController::GetAlltasks(
+    std::function<void(std::vector<std::reference_wrapper<API::IToDoTask>>)>
+        callback) {
+  auto getAllTasks = std::async(std::launch::async, [&]() {
+    auto tasks = _taskStorage->GetAllTasks();
+    for (auto const &refTask : tasks) {
+      ToDoTask &task =
+          (ToDoTask &)(std::unwrap_reference_t<API::IToDoTask &>(refTask));
+      task.RegisterForPropertyChanged(
+          [&](ToDoTask &sender, TaskAttribute changedAttribute) {
+            OnTaskAttributesChanged(sender, changedAttribute);
+          });
+    }
 
-        return std::vector<std::reference_wrapper<API::IToDoTask>>();
-      });
-
-  return getAllTasks.get();
+    callback(std::vector<std::reference_wrapper<API::IToDoTask>>());
+  });
 }
 } // namespace ToDo::Core

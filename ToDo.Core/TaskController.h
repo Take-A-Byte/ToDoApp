@@ -1,6 +1,6 @@
 #pragma once
-#include <optional>
 #include <functional>
+#include <optional>
 
 #include "ITaskStorage.h"
 
@@ -11,8 +11,10 @@ enum class TaskAttribute;
 class TaskController {
 public:
   TaskController(API::ITaskStorage &taskStorage);
-  std::optional<std::reference_wrapper<API::IToDoTask>> AddTask(std::string description);
-  std::vector<std::reference_wrapper<API::IToDoTask>> GetAlltasks();
+  void AddTask(
+      std::string description,
+      std::function<void(std::optional<std::reference_wrapper<API::IToDoTask>>)> callback);
+  void GetAlltasks(std::function<void(std::vector<std::reference_wrapper<API::IToDoTask>>)> callback);
 
 private:
   API::ITaskStorage *_taskStorage;
