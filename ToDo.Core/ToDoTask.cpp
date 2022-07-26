@@ -16,13 +16,18 @@ bool ToDoTask::GetHasCompleted() const { return _hasCompleted; }
 
 void ToDoTask::SetDescription(std::string newDescription) {
   _description = newDescription;
+  if (_propertyObserver) {
+    _propertyObserver(*this, TaskAttribute::Description);
+  }
 }
 
 void ToDoTask::SetHasCompleted(bool newHasCompleted) {
   _hasCompleted = newHasCompleted;
   if (_propertyObserver) {
+    _propertyObserver(*this, TaskAttribute::HasCompleted);
   }
 }
+
 void ToDoTask::RegisterForPropertyChanged(
     std::function<void(ToDoTask &sender, TaskAttribute changedAttribute)>
         propertyObserver) {

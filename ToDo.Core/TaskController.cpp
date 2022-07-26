@@ -18,11 +18,11 @@ void TaskController::AddTask(
     std::string description,
     std::function<void(std::optional<std::reference_wrapper<API::IToDoTask>>)>
         callback) {
-  if (description.empty()) {
-    return callback(std::nullopt);
-  }
+  std::async(std::launch::async, [&]() {
+    if (description.empty()) {
+      return callback(std::nullopt);
+    }
 
-  auto getNewAddedTask = std::async(std::launch::async, [&]() {
     if (!_newIdForUse) {
       _newIdForUse = _taskStorage->GetTotalNumberOfTasks();
     }
@@ -50,7 +50,7 @@ void TaskController::OnTaskAttributesChanged(ToDoTask &sender,
 void TaskController::GetAlltasks(
     std::function<void(std::vector<std::reference_wrapper<API::IToDoTask>>)>
         callback) {
-  auto getAllTasks = std::async(std::launch::async, [&]() {
+  std::async(std::launch::async, [&]() {
     auto tasks = _taskStorage->GetAllTasks();
     for (auto const &refTask : tasks) {
       ToDoTask &task =
