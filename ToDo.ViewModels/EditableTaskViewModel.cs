@@ -32,6 +32,7 @@ namespace ToDo.ViewModels
 
         public event Action<string> IncorrectDescription;
         internal event Func<string, Action<IToDoTask>, Task> AddTaskClicked;
+        internal event Func<EditableTaskViewModel, long, Task> DeleteTaskClicked;
 
         public TaskState CurrentTaskState
         {
@@ -99,6 +100,11 @@ namespace ToDo.ViewModels
             {
                 IncorrectDescription?.Invoke("Write a description for task before adding");
             }
+        }
+
+        public async Task DeleteTask()
+        {
+            await DeleteTaskClicked?.Invoke(this, _task.Id);
         }
 
         public void DiscardChanges()

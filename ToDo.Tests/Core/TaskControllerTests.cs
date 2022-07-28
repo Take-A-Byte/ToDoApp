@@ -59,6 +59,12 @@ namespace ToDo.Tests.Core
                     _tasks.Find(x => x.Id == id).HasCompleted = hasCompleted;
                     return true;
                 });
+            _mockTaskStorage.Setup(storage => storage.DeleteTask(It.IsAny<long>()))
+                .ReturnsAsync((long id) =>
+                {
+                    var foundTask = _tasks.Find(x => x.Id == id);
+                    return _tasks.Remove(foundTask);
+                });
         }
 
         [TestCleanup]
@@ -207,6 +213,29 @@ namespace ToDo.Tests.Core
 
             // then
             Assert.AreEqual(newHasCompleted, retrivedTasks[1].HasCompleted);
+        }
+
+        [TestMethod]
+        public async Task OnDeleteTask_WithIDPresent_DeleteingIsSuccessful() {
+            // given
+            long idToDelete = 1;
+            _tasks.Add(CreateNewMockTask(idToDelete, "This is test task 1", false));
+
+            // when
+            bool result = await _taskController.DeleteTask(idToDelete);
+
+            // then
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task OnDeleteTask_WithIDNotPresent_DeleteingIsUnsuccessful()
+        {
+            // when
+            bool result = await _taskController.DeleteTask(1);
+
+            // then
+            Assert.IsFalse(result);
         }
     }
 }

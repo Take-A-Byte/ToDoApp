@@ -128,11 +128,43 @@ namespace ToDo.Tests.Storage
             const string description = "new description";
             bool result = await _storage.UpdateTaskDescription(newTask.Id, "new description");
 
-            // given
+            // then
             Assert.IsTrue(result);
             var taskFromStorage = GetTaskWithId(newTask.Id);
             Assert.AreEqual(description, taskFromStorage.Description);
             Assert.AreEqual(newTask.HasCompleted, taskFromStorage.HasCompleted);
+        }
+        #endregion
+
+        #region Delete Task
+        [TestMethod]
+        public async Task OnDeleteTask_WithIDPresent_ReturnsTrue_DeletesTaskInStorage()
+        {
+            // given
+            long id = 1;
+            var newTask = CreateNewMockTask(id, "old description", false);
+            AddTaskToTestStorage(newTask);
+
+            // when
+            var result = await _storage.DeleteTask(id);
+
+            // then
+            Assert.AreEqual(true, result);
+            //Assert.
+
+        }
+
+        [TestMethod]
+        public async Task OnDeleteTask_WithIDNotPresent_ReturnsFalse_DoesNotChangeNumberOfTasksInStorage()
+        {
+            // given
+            long id = 1;
+
+            // when
+            var result = await _storage.DeleteTask(id);
+
+            // then
+            Assert.AreEqual(false, result);
         }
         #endregion
     }

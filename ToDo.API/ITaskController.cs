@@ -17,5 +17,7 @@ namespace ToDo.API
         /// <param name="description">Description of the task</param>
         /// <returns>Newly created task</returns>
         Task<IToDoTask> AddTask(string description);
+
+        Task<bool> DeleteTask(long task);
     }
 }

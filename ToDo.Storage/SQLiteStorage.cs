@@ -158,5 +158,27 @@ namespace ToDo.Storage
                 return reader.GetInt32(0);
             }
         }
+
+        public async Task<bool> DeleteTask(long id)
+        {
+            var deleteTaskCommand = _sqLiteConnection.CreateCommand();
+            deleteTaskCommand.CommandText =
+                @"
+                        DELETE
+                        FROM ""Tasks""
+                        WHERE id = $id
+                    ";
+            deleteTaskCommand.Parameters.AddWithValue("$id", id);
+            bool taskDeleted = false;
+            try
+            {
+                taskDeleted = await deleteTaskCommand.ExecuteNonQueryAsync() == 1;
+            }
+            catch
+            {
+            }
+
+            return taskDeleted;
+        }
     }
 }

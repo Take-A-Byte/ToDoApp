@@ -68,5 +68,10 @@ namespace ToDo.Core
             retrivedTask.PropertyChanged += OnTaskAttributesChanged;
             return retrivedTask;
         }
+
+        public async Task<bool> DeleteTask(long idToDelete)
+        {
+            return await _taskStorage.DeleteTask(idToDelete);
+        }
     }
 }

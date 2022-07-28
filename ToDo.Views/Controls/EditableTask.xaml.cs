@@ -131,5 +131,10 @@ namespace ToDo.Views.Controls
                 await ViewModel.AcceptChanges();
             }
         }
+
+        private async void OnTaskDeleteButtonClicked(object sender, TappedRoutedEventArgs e)
+        {
+            await ViewModel.DeleteTask();
+        }
     }
 }

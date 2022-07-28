@@ -42,6 +42,14 @@ namespace ToDo.ViewModels
             }
         }
 
+        private async Task DeleteTask(EditableTaskViewModel editableTaskViewModel, long id)
+        {
+            _toBeAddedTask.DeleteTaskClicked -= DeleteTask;
+            await _controller.DeleteTask(id);
+            _unfilteredTasks.Remove(editableTaskViewModel);
+            _tasks.Remove(editableTaskViewModel);
+        }
+
         public async Task Initialize(ITaskController controller)
         {
             _controller = controller;
@@ -49,6 +57,7 @@ namespace ToDo.ViewModels
             foreach (var task in await _controller.GetAllTasks())
             {
                 var taskViewModel = new EditableTaskViewModel(task.Value);
+                taskViewModel.DeleteTaskClicked += DeleteTask;
                 _unfilteredTasks.Add(taskViewModel);
                 _tasks.Add(taskViewModel);
             }
@@ -73,6 +82,7 @@ namespace ToDo.ViewModels
             if (newTask != null)
             {
                 saveTaskFromStorage(newTask);
+                ToBeAddedTask.DeleteTaskClicked += DeleteTask;
                 _unfilteredTasks.Add(ToBeAddedTask);
                 if (_doesSatisfySearchQuery(ToBeAddedTask.Description))
                 {
@@ -80,7 +90,7 @@ namespace ToDo.ViewModels
                 }
 
                 ToBeAddedTask = new EditableTaskViewModel();
-
+                
             }
         }
     }

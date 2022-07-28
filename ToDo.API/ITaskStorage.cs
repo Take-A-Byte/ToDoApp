@@ -43,5 +43,7 @@ namespace ToDo.API
         /// </summary>
         /// <returns>Total number of tasks in storage</returns>
         Task<long> GetTotalNumberOfTasks();
+
+        Task<bool> DeleteTask(long id);
     }
 }

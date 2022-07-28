@@ -52,14 +52,20 @@
                 <muxc:SymbolIconSource Symbol="Rename" />
             </muxc:TeachingTip.IconSource>
         </muxc:TeachingTip>
-        <Button
-            Grid.Column="2"
-            HorizontalAlignment="Right"
-            IsTabStop="False"
-            Style="{StaticResource TextBlockButtonStyle}"
-            Tapped="OnTaskStateUpdateButtonClicked">
-            <SymbolIcon x:Name="TaskStateUpdateIcon" Symbol="Edit" />
-        </Button>
+        <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button
+                IsTabStop="False"
+                Style="{StaticResource TextBlockButtonStyle}"
+                Tapped="OnTaskStateUpdateButtonClicked">
+                <SymbolIcon x:Name="TaskStateUpdateIcon" Symbol="Edit" />
+            </Button>
+            <Button
+                IsTabStop="False"
+                Style="{StaticResource TextBlockButtonStyle}"
+                Tapped="OnTaskDeleteButtonClicked">
+                <SymbolIcon x:Name="TaskUpdateIcon" Symbol="Delete" />
+            </Button>
+        </StackPanel>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="TaskStates">
                 <VisualState x:Name="AddingTask">
